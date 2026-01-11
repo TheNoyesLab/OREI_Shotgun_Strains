@@ -151,3 +151,27 @@ Next Steps:
  - Test current binners Metabat2, Maxbin2
  - Expand to additional binners (e.g. concoct, DasTool)
  - Run e.g. dRep, gtdbtk on Metabat2 bins
+
+
+
+
+
+--------
+
+2026-01-11
+
+Adjusting to new file system
+ - Set up filepaths/aliases
+ - Redownloaded conda environments
+
+Start combining MAG database (rename.sh)
+ - Add Bin name to headers to differentiate between bins
+ - Concat into one database
+ - /projects/standard/noyes046/elder099/OREI_Shotgun_Strains_Data/orei_strain_analysis/binning/renaming/all_renamed.fa
+
+Next steps: 
+ - Download reads from Tier 2 storage
+ - Map small subset of reads to database
+ - Evaluate output data
+ - Compare output mapping to strain detection criteria (50% coverage)
+
