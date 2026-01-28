@@ -7,7 +7,7 @@ bins="/projects/standard/noyes046/elder099/OREI_Shotgun_Strains_Data/orei_strain
 
 
 #ls $og_bins | sed "s/fa$//g" | grep "USDA1000" > $bins
-ls $og_bins | sed "s/fa$//g" > $bins
+ls $og_bins | sed "s/.fa$//g" > $bins
 
 
 mkdir -p $rename/tmp
@@ -19,7 +19,7 @@ do
 	#sed "s/^>/>${file}/g" renamed_drep/${file}fa | grep ">"
 	
 	#Prepend file/bin name to headers
-	sed "s/^>/>${file}/g" $og_bins/${file}fa > $rename/tmp/renamed_${file}.fa
+	sed "s/^>/>${file}|/g" $og_bins/${file}.fa > $rename/tmp/renamed_${file}.fa
 done
 
 
