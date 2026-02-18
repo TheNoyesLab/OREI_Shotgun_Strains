@@ -19,8 +19,9 @@ mamba activate coverage
 #coverm genome -b $reads/USDA1000_aligned_sorted.bam -r $rename/reference/all_renamed.fa -s '|' -m mean relative_abundance covered_fraction --min-covered-fraction 5 -t 60 -o coverm_out.tsv
 
 
-coverm genome -b $rename/USDA1000_S24_aligned_sorted.bam -s '|' -m mean trimmed_mean relative_abundance covered_fraction --min-covered-fraction 50 -t 10 -o coverm_out.tsv
+#coverm genome -b $rename/alignment/USDA1001_S92.non.host.allMAGs.bam -s '|' -m mean trimmed_mean relative_abundance covered_fraction --min-covered-fraction 10 -t 30 -o coverm_out.tsv
 
+coverm genome -b $rename/alignment/*.bam -s '|' -m mean trimmed_mean relative_abundance covered_fraction --min-covered-fraction 10 -t 30 --output-format sparse  -o coverm_out.tsv
 #bowtie2-build $REFERENCE_MAGS (all_renamed.fa) all_renamed
 
 #bowtie2 -x ../renaming/reference/index/all_renamed -1 USDA1000_S24.non.host.R1.fastq.gz -2 USDA1000_S24.non.host.R2.fastq.gz
