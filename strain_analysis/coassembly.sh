@@ -1,7 +1,7 @@
 #!/bin/bash
 
-rundir='/scratch.global/elder099/strains_run_v5'
-reads='/scratch.global/fermx014/data/elder099/elder099_2024-12-10_Noyes_Project_019/NonHostFastq'
+rundir='/scratch.global/elder099/project019'
+reads="$rundir/project019_reads"
 coReads="$rundir/coReads"
 
 # Activate conda
@@ -17,11 +17,13 @@ mkdir -p coReads
 if [ -f "$rundir/coassembly_groupR1.txt" ] ; then
     rm "$rundir/coassembly_group.txt"
     rm "$rundir/coassembly_groupR1.txt"
-    rm "$rundir/coassebmly_groupR2.txt"
+    rm "$rundir/coassembly_groupR2.txt"
 fi
 
-for i in {1..317} #Loop through each cow group (317 groups)
+for i in {1..317} #Loop through each cow group (211 groups, but group # up to 317)
 do
+	echo "Concatenating Group # $i"
+
 	#Read through CSV file
 	cat $rundir/cow_coassembly_groups.csv | while IFS="," read -r col1 col2 col3 col4 col5
 	do
@@ -34,8 +36,8 @@ do
 			
 			fullname1=$(ls $reads/ | grep ${col2}_.*.non.host.R1.fastq.gz)
 			fullname2=$(ls $reads/ | grep ${col2}_.*.non.host.R2.fastq.gz)
-			echo "Concatenating Group # $i"
-			echo $fullname1
+			#echo "Concatenating Group # $i"
+			#echo $fullname1
 
 			echo $col2 | tr -d '"' >> $rundir/coassembly_group.txt
 			echo $reads/${fullname1} | tr -d '"' >> $rundir/coassembly_groupR1.txt
@@ -44,6 +46,7 @@ do
 		
 
 	done
+	
 
 	#Concatenate reads for each existing group
 	if [ -f "$rundir/coassembly_groupR1.txt" ] ; then
@@ -54,11 +57,12 @@ do
 		#cat $rundir/coassembly_groupR2.txt
 	        
 		###Algo for concatenating reads
-        	#cat (list of reads in each group here)
-        	coread_name=$(cat $rundir/coassembly_group.txt | tr '\n' '_')
+        	
+        	#Concatenate Sample IDs
+		coread_name=$(cat $rundir/coassembly_group.txt | tr '\n' '_')
 		#echo $coread_name
 
-		#Concatenate forward and reverse reads
+		#Concatenate list of forward and reverse reads
 		xargs cat < $rundir/coassembly_groupR1.txt > $coReads/${coread_name}.non.host.R1.fastq.gz
 		xargs cat < $rundir/coassembly_groupR2.txt > $coReads/${coread_name}.non.host.R2.fastq.gz
 		

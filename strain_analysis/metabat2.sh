@@ -1,27 +1,27 @@
 #!/bin/bash
 
 #Establish file paths
-rundir='/scratch.global/elder099/strains_run_v5'
-reads='/scratch.global/fermx014/help/elder099/Noyes_Project_019/NonHostFastq'
+rundir='/scratch.global/elder099/project019'
+reads="$rundir/project019_reads"
+coReads="$rundir/coReads"
 assemblies="$rundir/assemblies"
 coassemblies="$assemblies/coassemblies"
-coReads="$rundir/coReads"
-indiv_reads="$rundir/indiv_read_list.txt"
-coRead_list="$rundir/coRead_list.txt"
 binning="$rundir/binning"
 work="$binning/work_files"
-
+indiv_reads="$rundir/indiv_read_files.txt"
+coRead_list="$rundir/coRead_list.txt"
 
 # Activate conda
-. /home/noyes046/elder099/anaconda3/etc/profile.d/conda.sh
-. /home/noyes046/elder099/anaconda3/etc/profile.d/mamba.sh
+. /projects/standard/noyes046/elder099/miniforge3/etc/profile.d/conda.sh
+. /projects/standard/noyes046/elder099/miniforge3/etc/profile.d/mamba.sh
 
-#Activate conda environment
-mamba activate metawrap #Change this once conda is fixed
+#binning environment
+mamba activate binning
 
 
 mkdir -p "$rundir/binning"
 
+indiv_reads="$rundir/one_file.txt"
 
 #####
 #####BINNING INDIVIDUAL ASSEMBLIES
@@ -33,7 +33,7 @@ do
 	mkdir "$binning/work_files" #Create work directory
 	
 	
-	assembly_path="$assemblies/spades_${file}_output"
+	assembly_path="$assemblies/megahit_${file}_output"
 	
 	#Only run binning on existing assemblies
 	if [ -d "$assembly_path" ]; then
@@ -41,17 +41,14 @@ do
 		###Align original reads to generated scaffold
 		echo "alignment"
 		#Index scaffold file
-		bwa index $assemblies/spades_${file}_output/final.contigs.fa
+		bwa index $assemblies/megahit_${file}_output/final.contigs.fa
 	
 		#Make SAM of dehosted reads vs Scaffold
-		bwa mem -t 80 $assemblies/spades_${file}_output/final.contigs.fa $reads/$file.R1.fastq.gz $reads/$file.R2.fastq.gz > $work/$file.sam
-	
-		#Make BAM from SAM
-		samtools view -@ 80 -bS $work/$file.sam > $work/$file.bam
-	
+		bwa mem -t 40 $assemblies/megahit_${file}_output/final.contigs.fa $reads/$file.R1.fastq.gz $reads/$file.R2.fastq.gz | samtools view -b > $work/$file.bam
+
 		echo "sorting"
 		#Sort BAM file
-		samtools sort -@ 80 $work/$file.bam -o $work/${file}_sorted.bam
+		samtools sort -@ 40 $work/$file.bam -o $work/${file}_sorted.bam
 
 		echo "depth file"
 		#Grab depth file from BAM
@@ -65,7 +62,7 @@ do
 		echo "Bins directory: $binning/metabat2/${file}_bins"
         	mkdir -p $binning/metabat2/${file}_bins
 		
-		metabat2 -i $assemblies/spades_${file}_output/final.contigs.fa -a $work/depth.txt -o $binning/metabat2/${file}_bins/${file}_bin -t 80 -m 1500
+		metabat2 -i $assemblies/megahit_${file}_output/final.contigs.fa -a $work/depth.txt -o $binning/metabat2/${file}_bins/${file}_metabat2_bin -t 40 -m 1500
 	
 
 	else

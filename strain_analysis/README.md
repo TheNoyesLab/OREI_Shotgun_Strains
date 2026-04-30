@@ -175,3 +175,29 @@ Next steps:
  - Evaluate output data
  - Compare output mapping to strain detection criteria (50% coverage)
 
+
+
+______
+
+2026-04-30
+
+Reran Failed Assemblies
+ - Rerun on slurm after timeout failures
+
+Set up MetaBinner
+ - Finalized per-sample filepaths
+ - Started adapting for parallelization
+
+Set up DASTool
+ - Finalized per-sample filepaths for all binners
+ - Produced consensus bins
+ - Started debugging on DASTool reduced bin count
+
+Next steps:
+ - Finalize DASTool by:
+   - Rerun all bins for one sample (retry/renaming)
+   - Ensure all bin names are unique
+ - Finish adapting binners for slurm parallel
+   - Maxbin2, Metabat2, Metabinner, AND DAS Tool
+ - Migrate Assemblies and DASTool Bins to home
+

@@ -1,28 +1,33 @@
-#!/bin/bash
+#!/bin/bash -l
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=20
+#SBATCH --mem=200g
+#SBATCH -t 18:00:00
+#SBATCH --mail-type=END 
+#SBATCH --mail-user=elder099@umn.edu
+#
 
-#Establish file paths
+#establish filepaths
 rundir='/scratch.global/elder099/project019'
 reads="$rundir/project019_reads"
 coReads="$rundir/coReads"
 assemblies="$rundir/assemblies"
 coassemblies="$assemblies/coassemblies"
-binning="$rundir/binning"
-work="$binning/work_files"
-indiv_reads="$rundir/indiv_read_files.txt"
+coReads="$rundir/coReads"
+indiv_reads="$rundir/indiv_read_list.txt"
 coRead_list="$rundir/coRead_list.txt"
+binning="$rundir/binning"
+work="$binning/work"
 
 # Activate conda
 . /projects/standard/noyes046/elder099/miniforge3/etc/profile.d/conda.sh
 . /projects/standard/noyes046/elder099/miniforge3/etc/profile.d/mamba.sh
 
-#binning environment
-mamba activate binning
-
+#all binning is in binning environment
+mamba activate binning #all binning is in here
 
 mkdir -p "$rundir/binning"
-mkdir -p "$binning/maxbin2"
 
-indiv_reads="$rundir/one_file.txt"
 
 #####
 #####BINNING INDIVIDUAL ASSEMBLIES
@@ -30,23 +35,44 @@ indiv_reads="$rundir/one_file.txt"
 cat $indiv_reads | while read file
 #tail $indiv_reads -n +2 | while read file
 do
-
-
-
-	echo "$file"
-	#mkdir "$binning/work_files" #Create work directory
+        echo "$file"
+	mkdir "$binning/work_files" #Create work directory
 	
 	
 	assembly_path="$assemblies/megahit_${file}_output"
 	
 	#Only run binning on existing assemblies
 	if [ -d "$assembly_path" ]; then
-		
-		cd $binning/maxbin2
-		mkdir ${file}_bins		
+	
+		###Align original reads to generated scaffold
+		echo "alignment"
+		#Index scaffold file
+		bwa index $assemblies/megahit_${file}_output/final.contigs.fa
+	
+		#Make SAM of dehosted reads vs Scaffold
+		bwa mem -t 20 $assemblies/megahit_${file}_output/final.contigs.fa $reads/$file.R1.fastq.gz $reads/$file.R2.fastq.gz > $work/$file.sam
+	
+		#Make BAM from SAM
+		samtools view -@ 20 -bS $work/$file.sam > $work/$file.bam
+	
+		echo "sorting"
+		#Sort BAM file
+		samtools sort -@ 20 $work/$file.bam -o $work/${file}_sorted.bam
 
-		run_MaxBin.pl -contig $assemblies/megahit_${file}_output/final.contigs.fa -reads $reads/$file.R1.fastq.gz -reads2 $reads/$file.R2.fastq.gz -thread 40 -min_contig_length 1500 -out $binning/maxbin2/${file}_bins/${file}_maxbin_bin
+		echo "depth file"
+		#Grab depth file from BAM
+		jgi_summarize_bam_contig_depths --outputDepth $work/depth.txt $work/${file}_sorted.bam
+
+
+
+	
+		###Run actual binning using metabat2
 		
+		echo "Bins directory: $binning/metabat2/${file}_bins"
+        	mkdir -p $binning/metabat2/${file}_bins
+		
+		metabat2 -i $assemblies/megahit_${file}_output/final.contigs.fa -a $work/depth.txt -o $binning/metabat2/${file}_bins/${file}_bin -t 20 -m 1500
+	
 
 	else
 		#If not present, do nothing
@@ -57,8 +83,8 @@ do
 	
 
 	###Complete binning script by deleting work files
-	#cd $binning
-	#rm -fr work_files
+	cd $binning
+	rm -fr work_files
 
 done
 
