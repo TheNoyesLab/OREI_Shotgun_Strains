@@ -92,4 +92,4 @@ sort -u coRead_list_trim.txt > coRead_list.txt #full list of coReads
 rm coRead_list_trim.txt
 
 ###Final list of reads + coReads
-cat indiv_read_list.txt coRead_list.txt > final_read_list.txt
+#cat indiv_read_list.txt coRead_list.txt > final_read_list.txt

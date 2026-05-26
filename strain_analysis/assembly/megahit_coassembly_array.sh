@@ -15,8 +15,8 @@ assemblies="$rundir/assemblies"
 coassemblies="$assemblies/coassemblies"
 coReads="$rundir/coReads"
 indiv_reads="$rundir/indiv_read_list.txt"
-#coRead_list="$rundir/coRead_list.txt"
-coRead_list="$rundir/tmp_coRead_list.txt" #Temporary coReads that failed the first run
+coRead_list="$rundir/coRead_list.txt"
+#coRead_list="$rundir/tmp_coRead_list.txt" #Temporary coReads that failed the first run
 
 # Activate conda
 . /projects/standard/noyes046/elder099/miniforge3/etc/profile.d/conda.sh
@@ -30,7 +30,6 @@ file=$(sed -n ${SLURM_ARRAY_TASK_ID}p $coRead_list)
 
 cd $assemblies
 mkdir -p coassemblies
-#du -sh $coReads/${file}.R1.fastq.gz
 
 
 #Only run assembly on samples that haven't been run
